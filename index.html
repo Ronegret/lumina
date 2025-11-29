@@ -1,396 +1,497 @@
-import * as React from "react"
-import { addPropertyControls, ControlType } from "framer"
-import { motion, AnimatePresence } from "framer-motion"
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lumina | Tu Espejo Digital</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
-/**
- * LUMINA APP - CÓDIGO MAESTRO PARA FRAMER
- * Incluye: Numerología, Astrología, Lectura de Mano (Cámara) y Biorritmos.
- */
+    <style>
+        /* --- 1. ESTILOS VISUALES (CSS) --- */
+        :root {
+            --bg-color: #F9F7F2;       /* Crema Paz */
+            --primary: #8A9A5B;        /* Verde Salvia */
+            --primary-dark: #6e7c49;
+            --accent: #E2725B;         /* Terracota */
+            --text: #36454F;           /* Carbón Suave */
+            --card-bg: #FFFFFF;
+            --scan-line: #E6E6FA;      /* Lavanda */
+        }
 
-// --- 1. CONFIGURACIÓN DE DISEÑO (ESTÉTICA YOGA) ---
-const theme = {
-    bg: "#F9F7F2",       // Cream (Fondo Paz)
-    primary: "#8A9A5B",  // Sage Green (Naturaleza)
-    accent: "#E2725B",   // Terracotta (Energía)
-    text: "#36454F",     // Charcoal (Lectura clara)
-    glass: "rgba(255, 255, 255, 0.7)",
-    success: "#A8C3A0",
-}
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-const styles = {
-    container: {
-        width: "100%",
-        height: "100%",
-        backgroundColor: theme.bg,
-        color: theme.text,
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-        position: "relative",
-        fontFamily: "Inter, sans-serif",
-    },
-    input: {
-        width: "100%",
-        padding: "16px",
-        borderRadius: 12,
-        border: "1px solid rgba(0,0,0,0.1)",
-        marginBottom: 16,
-        backgroundColor: "white",
-        fontSize: 16,
-        outline: "none",
-    },
-    button: {
-        width: "100%",
-        padding: "18px",
-        borderRadius: 50,
-        border: "none",
-        backgroundColor: theme.primary,
-        color: "white",
-        fontSize: 16,
-        fontWeight: 600,
-        cursor: "pointer",
-        marginTop: 10,
-        boxShadow: "0 4px 12px rgba(138, 154, 91, 0.4)",
-    },
-    card: {
-        backgroundColor: "white",
-        borderRadius: 24,
-        padding: 24,
-        marginBottom: 16,
-        boxShadow: "0 2px 10px rgba(0,0,0,0.03)",
-    },
-    title: {
-        fontFamily: "serif", // Framer usará la fuente serif del sistema si no hay otra
-        fontSize: 32,
-        color: theme.primary,
-        margin: "0 0 10px 0",
-    },
-}
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #e0e0e0; /* Fondo gris para PC */
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); /* Textura sutil fondo PC */
+        }
 
-// --- 2. LÓGICA MÍSTICA (MATEMÁTICAS) ---
+        /* CONTENEDOR PRINCIPAL (Simula el Móvil en PC) */
+        #app-frame {
+            width: 100%;
+            max-width: 414px; /* Ancho máximo tipo iPhone Max */
+            height: 100vh;
+            max-height: 896px; /* Altura máxima para PC */
+            background-color: var(--bg-color);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
 
-// Calcular Signo Zodiacal
-const getZodiac = (dateStr) => {
-    if (!dateStr) return { sign: "Sol", element: "Fuego" };
-    const date = new Date(dateStr);
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
+        /* --- RESPONSIVIDAD: En móviles reales ocupa todo --- */
+        @media (max-width: 480px) {
+            body { background-color: var(--bg-color); }
+            #app-frame {
+                max-width: 100%;
+                max-height: 100%;
+                border-radius: 0;
+                box-shadow: none;
+            }
+        }
 
-    if ((month == 1 && day <= 20) || (month == 12 && day >= 22)) return { sign: "Capricornio", element: "Tierra" };
-    if ((month == 1 && day >= 21) || (month == 2 && day <= 18)) return { sign: "Acuario", element: "Aire" };
-    if ((month == 2 && day >= 19) || (month == 3 && day <= 20)) return { sign: "Piscis", element: "Agua" };
-    if ((month == 3 && day >= 21) || (month == 4 && day <= 20)) return { sign: "Aries", element: "Fuego" };
-    if ((month == 4 && day >= 21) || (month == 5 && day <= 20)) return { sign: "Tauro", element: "Tierra" };
-    if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) return { sign: "Géminis", element: "Aire" };
-    if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) return { sign: "Cáncer", element: "Agua" };
-    if ((month == 7 && day >= 23) || (month == 8 && day <= 23)) return { sign: "Leo", element: "Fuego" };
-    if ((month == 8 && day >= 24) || (month == 9 && day <= 23)) return { sign: "Virgo", element: "Tierra" };
-    if ((month == 9 && day >= 24) || (month == 10 && day <= 23)) return { sign: "Libra", element: "Aire" };
-    if ((month == 10 && day >= 24) || (month == 11 && day <= 22)) return { sign: "Escorpio", element: "Agua" };
-    if ((month == 11 && day >= 23) || (month == 12 && day <= 21)) return { sign: "Sagitario", element: "Fuego" };
-    return { sign: "Desconocido", element: "Eter" };
-}
+        /* PANTALLAS */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-color);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            transform: translateY(20px);
+            overflow-y: auto; /* Scroll si el contenido es largo */
+        }
 
-// Calcular Numerología (Camino de Vida)
-const getLifePath = (dateStr) => {
-    if (!dateStr) return 0;
-    const digits = dateStr.replace(/\D/g, '').split('').map(Number);
-    let sum = digits.reduce((a, b) => a + b, 0);
-    while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
-        sum = sum.toString().split('').map(Number).reduce((a, b) => a + b, 0);
-    }
-    return sum;
-}
+        .screen.active {
+            opacity: 1;
+            pointer-events: all;
+            transform: translateY(0);
+            z-index: 10;
+        }
 
-// Calcular Biorritmo (0 a 100)
-const getBiorhythm = (dateStr, cycle) => {
-    if (!dateStr) return 50;
-    const birth = new Date(dateStr);
-    const now = new Date();
-    const diff = Math.floor((now - birth) / (1000 * 60 * 60 * 24));
-    const val = Math.sin((2 * Math.PI * diff) / cycle);
-    return Math.floor(((val + 1) / 2) * 100);
-}
+        /* TIPOGRAFÍA Y COMPONENTES */
+        h1, h2, h3 {
+            font-family: 'Cinzel', serif;
+            color: var(--primary);
+            margin-top: 0;
+        }
 
-// --- 3. COMPONENTES INTERNOS ---
+        p {
+            line-height: 1.6;
+            opacity: 0.8;
+            font-size: 15px;
+        }
 
-// A. Pantalla de Escáner (Con Cámara Real o Simulación)
-const ScannerView = ({ onComplete }) => {
-    const videoRef = React.useRef(null);
-    const [hasCamera, setHasCamera] = React.useState(false);
+        .input-group {
+            margin-bottom: 20px;
+        }
 
-    React.useEffect(() => {
-        // Intentar acceder a la cámara
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-            .then(stream => {
-                if (videoRef.current) {
-                    videoRef.current.srcObject = stream;
-                    setHasCamera(true);
-                }
-            })
-            .catch(err => {
-                console.log("No camera access", err);
-                setHasCamera(false);
-            });
+        label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            color: var(--primary);
+            display: block;
+            margin-bottom: 8px;
+        }
 
-        // Temporizador para simular análisis
-        const timer = setTimeout(onComplete, 4000);
-        return () => clearTimeout(timer);
-    }, []);
+        input {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            background: var(--card-bg);
+            outline: none;
+            transition: border 0.3s;
+        }
 
-    return (
-        <div style={{ ...styles.container, background: "black", justifyContent: "center", alignItems: "center" }}>
-            {/* Capa de Video o Fondo */}
-            {hasCamera ? (
-                <video 
-                    ref={videoRef} 
-                    autoPlay 
-                    playsInline 
-                    style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.6 }} 
-                />
-            ) : (
-                <div style={{ position: "absolute", width: "100%", height: "100%", background: `linear-gradient(45deg, ${theme.primary}, #000)` }} />
-            )}
+        input:focus {
+            border-color: var(--primary);
+        }
 
-            {/* Gráficos de Escaneo (Overlay) */}
-            <div style={{ position: "absolute", zIndex: 10, width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    style={{ 
-                        width: 280, 
-                        height: 400, 
-                        border: "2px dashed rgba(255,255,255,0.5)", 
-                        borderRadius: 40,
-                        position: "relative",
-                        overflow: "hidden"
-                    }}
-                >
-                    {/* Línea láser de escaneo */}
-                    <motion.div 
-                        style={{ width: "100%", height: 4, background: theme.accent, boxShadow: "0 0 20px " + theme.accent }}
-                        animate={{ top: ["0%", "100%", "0%"] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                        initial={{ position: "absolute", top: 0 }}
-                    />
-                </motion.div>
-                <p style={{ color: "white", marginTop: 20, letterSpacing: 2, fontSize: 12 }}>CONECTANDO CON TU ENERGÍA...</p>
+        button.btn-primary {
+            width: 100%;
+            padding: 18px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(138, 154, 91, 0.4);
+            transition: transform 0.2s, background 0.3s;
+            margin-top: 10px;
+        }
+
+        button.btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        /* CARDS DE RESULTADOS */
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            animation: slideIn 0.6s ease;
+        }
+
+        .numerology-number {
+            font-size: 60px;
+            font-family: 'Cinzel', serif;
+            color: var(--accent);
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        /* BARRA DE BIORRITMOS */
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 1s ease-out;
+        }
+
+        /* ESCÁNER DE MANO */
+        .scanner-container {
+            width: 100%;
+            height: 400px;
+            background: #000;
+            border-radius: 30px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #camera-video {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.7;
+        }
+
+        .scan-overlay {
+            width: 80%;
+            height: 70%;
+            border: 2px dashed rgba(255,255,255,0.4);
+            border-radius: 40px;
+            position: relative;
+            z-index: 5;
+            box-shadow: 0 0 0 1000px rgba(0,0,0,0.5); /* Efecto viñeta */
+        }
+
+        .laser {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--scan-line);
+            box-shadow: 0 0 15px var(--scan-line);
+            animation: scanAnim 3s infinite ease-in-out;
+        }
+
+        @keyframes scanAnim {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="app-frame">
+        
+        <div id="screen-welcome" class="screen active" style="justify-content: center; text-align: center;">
+            <div style="width: 80px; height: 80px; background: var(--primary); border-radius: 50%; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 40px;">✋</span>
+            </div>
+            <h1 style="font-size: 36px;">Lumina</h1>
+            <p style="margin-bottom: 40px;">Descubre tu mapa estelar, numerología y la energía de tus manos.</p>
+            <button class="btn-primary" onclick="goToScreen('input')">COMENZAR VIAJE</button>
+        </div>
+
+        <div id="screen-input" class="screen" style="justify-content: center;">
+            <h2>Tus Coordenadas</h2>
+            <p>Para alinear las estrellas, necesitamos saber quién eres.</p>
+            
+            <div class="input-group">
+                <label>Nombre Completo</label>
+                <input type="text" id="user-name" placeholder="Ej. Ana Luz">
+            </div>
+
+            <div class="input-group">
+                <label>Fecha de Nacimiento</label>
+                <input type="date" id="user-date">
+            </div>
+
+            <button class="btn-primary" onclick="validateAndScan()">ESCANEAR ENERGÍA</button>
+            <p style="text-align: center; font-size: 12px; margin-top: 15px; cursor: pointer; color: #999;" onclick="goToScreen('welcome')">Volver</p>
+        </div>
+
+        <div id="screen-scanner" class="screen" style="background: #111; padding: 0;">
+            <div class="scanner-container">
+                <video id="camera-video" autoplay playsinline muted></video>
+                <div class="scan-overlay">
+                    <div class="laser"></div>
+                </div>
+                <div style="position: absolute; bottom: 30px; color: white; text-align: center; width: 100%; z-index: 10;">
+                    <p style="letter-spacing: 2px; font-size: 12px;">ANALIZANDO PALMA DERECHA...</p>
+                </div>
             </div>
         </div>
-    );
-}
 
-// --- 4. COMPONENTE PRINCIPAL EXPORTADO ---
+        <div id="screen-dashboard" class="screen">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div>
+                    <h2 id="result-name" style="margin: 0;">Hola, Alma</h2>
+                    <p style="margin: 0; font-size: 12px; color: var(--primary);">Lectura completada</p>
+                </div>
+                <div onclick="resetApp()" style="cursor: pointer;">↺</div>
+            </div>
 
-export default function LuminaApp(props) {
-    const [screen, setScreen] = React.useState("welcome"); // welcome, input, scanner, dashboard
-    const [data, setData] = React.useState({ name: "", date: "" });
+            <div class="card">
+                <h3 style="font-size: 14px; text-transform: uppercase; color: #999;">Tu Astro Regente</h3>
+                <div style="display: flex; align-items: center; gap: 15px; margin-top: 10px;">
+                    <span style="font-size: 30px;">✨</span>
+                    <div>
+                        <strong id="zodiac-sign" style="font-size: 20px; color: var(--text);">Calculando...</strong>
+                        <div id="zodiac-element" style="font-size: 13px; color: var(--accent);">Elemento</div>
+                    </div>
+                </div>
+            </div>
 
-    // Manejadores de flujo
-    const handleStart = () => setScreen("input");
-    
-    const handleScan = () => {
-        if (!data.name || !data.date) {
-            alert("Por favor completa tus datos astrales.");
-            return;
-        }
-        setScreen("scanner");
-    };
-
-    const handleResults = () => setScreen("dashboard");
-    
-    const handleReset = () => {
-        setData({ name: "", date: "" });
-        setScreen("welcome");
-    };
-
-    // Cálculos dinámicos
-    const zodiac = getZodiac(data.date);
-    const lifePath = getLifePath(data.date);
-    const physical = getBiorhythm(data.date, 23);
-    const emotional = getBiorhythm(data.date, 28);
-
-    return (
-        <div style={styles.container}>
-            <AnimatePresence mode="wait">
-                
-                {/* PANTALLA 1: BIENVENIDA */}
-                {screen === "welcome" && (
-                    <motion.div 
-                        key="welcome"
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        style={{ ...styles.container, padding: 30, justifyContent: "center", textAlign: "center" }}
-                    >
-                        <motion.div 
-                            animate={{ y: [0, -10, 0] }} 
-                            transition={{ duration: 3, repeat: Infinity }}
-                            style={{ width: 80, height: 80, borderRadius: 40, background: theme.primary, margin: "0 auto 30px" }} 
-                        />
-                        <h1 style={styles.title}>Lumina</h1>
-                        <p style={{ lineHeight: 1.6, color: "#666" }}>
-                            Descubre lo que los astros, tus manos y los números dicen de ti.
+            <div class="card" style="background-color: var(--primary); color: white;">
+                <h3 style="font-size: 14px; text-transform: uppercase; color: rgba(255,255,255,0.7);">Camino de Vida</h3>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                    <div class="numerology-number" id="life-path" style="color: white;">0</div>
+                    <div style="text-align: right; width: 60%;">
+                        <p id="life-meaning" style="font-size: 12px; margin: 0; color: rgba(255,255,255,0.9);">
+                            Significado...
                         </p>
-                        <div style={{ height: 40 }} />
-                        <button style={styles.button} onClick={handleStart}>INICIAR VIAJE</button>
-                    </motion.div>
-                )}
+                    </div>
+                </div>
+            </div>
 
-                {/* PANTALLA 2: DATOS */}
-                {screen === "input" && (
-                    <motion.div 
-                        key="input"
-                        initial={{ x: 300, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -300, opacity: 0 }}
-                        style={{ ...styles.container, padding: 30, justifyContent: "center" }}
-                    >
-                        <h2 style={{ ...styles.title, fontSize: 24 }}>Tus Coordenadas</h2>
-                        <p style={{ marginBottom: 30, fontSize: 14, opacity: 0.7 }}>Para alinear el mapa estelar.</p>
-                        
-                        <label style={{ fontSize: 12, fontWeight: "bold", color: theme.primary, marginBottom: 5, display: "block" }}>NOMBRE COMPLETO</label>
-                        <input 
-                            style={styles.input} 
-                            placeholder="Tu nombre aquí" 
-                            value={data.name}
-                            onChange={(e) => setData({ ...data, name: e.target.value })}
-                        />
+            <div class="card">
+                <h3 style="font-size: 14px; text-transform: uppercase; color: #999;">Quiromancia Digital</h3>
+                <p style="font-size: 14px; margin-top: 10px;">
+                    <strong style="color: var(--accent);">Línea del Corazón:</strong> Se detecta una curvatura profunda. Tienes una gran capacidad para la empatía emocional esta semana.
+                </p>
+                <p style="font-size: 14px;">
+                    <strong style="color: var(--accent);">Monte de Venus:</strong> Elevado. Tu energía vital y pasión están en un ciclo alto.
+                </p>
+            </div>
 
-                        <label style={{ fontSize: 12, fontWeight: "bold", color: theme.primary, marginBottom: 5, display: "block" }}>FECHA DE NACIMIENTO</label>
-                        <input 
-                            type="date" 
-                            style={styles.input} 
-                            value={data.date}
-                            onChange={(e) => setData({ ...data, date: e.target.value })}
-                        />
+            <div class="card">
+                <h3 style="font-size: 14px; text-transform: uppercase; color: #999;">Biorritmos Hoy</h3>
+                
+                <div style="margin-top: 15px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                        <span>Energía Física</span>
+                        <span id="bio-phys-val">0%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div id="bio-phys-bar" class="progress-bar-fill" style="background-color: var(--primary);"></div>
+                    </div>
+                </div>
 
-                        <button style={styles.button} onClick={handleScan}>ESCANEAR AURA & MANO</button>
-                    </motion.div>
-                )}
+                <div style="margin-top: 15px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                        <span>Energía Emocional</span>
+                        <span id="bio-emo-val">0%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div id="bio-emo-bar" class="progress-bar-fill" style="background-color: var(--accent);"></div>
+                    </div>
+                </div>
+            </div>
 
-                {/* PANTALLA 3: ESCÁNER */}
-                {screen === "scanner" && (
-                    <motion.div 
-                        key="scanner" 
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        style={{ width: "100%", height: "100%" }}
-                    >
-                        <ScannerView onComplete={handleResults} />
-                    </motion.div>
-                )}
+            <button class="btn-primary" style="background: transparent; border: 1px solid #ccc; color: #999; box-shadow: none;" onclick="resetApp()">Cerrar Lectura</button>
+            <div style="height: 50px;"></div> </div>
 
-                {/* PANTALLA 4: DASHBOARD DE RESULTADOS */}
-                {screen === "dashboard" && (
-                    <motion.div 
-                        key="dashboard"
-                        initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-                        style={{ ...styles.container, overflowY: "scroll" }}
-                    >
-                        {/* Header */}
-                        <div style={{ padding: "40px 24px 20px", background: "white" }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <div>
-                                    <h2 style={{ fontSize: 22, margin: 0, fontFamily: "serif", color: theme.text }}>Hola, {data.name.split(" ")[0]}</h2>
-                                    <p style={{ fontSize: 14, color: theme.primary, margin: 0 }}>Lectura completada</p>
-                                </div>
-                                <div style={{ width: 40, height: 40, borderRadius: 20, background: theme.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>
-                                    ✨
-                                </div>
-                            </div>
-                        </div>
+    </div>
 
-                        <div style={{ padding: 24, paddingBottom: 100 }}>
-                            
-                            {/* 1. Carta Astral Resumida */}
-                            <div style={styles.card}>
-                                <h3 style={{ fontSize: 16, textTransform: "uppercase", letterSpacing: 1, color: "#999", margin: "0 0 15px 0" }}>Astro Identidad</h3>
-                                <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
-                                    <div style={{ fontSize: 40 }}>🌞</div>
-                                    <div>
-                                        <div style={{ fontSize: 24, fontWeight: "bold", color: theme.text }}>{zodiac.sign}</div>
-                                        <div style={{ fontSize: 14, color: theme.accent }}>Elemento: {zodiac.element}</div>
-                                    </div>
-                                </div>
-                            </div>
+    <script>
+        // --- NAVEGACIÓN ---
+        function goToScreen(screenId) {
+            // Ocultar todas
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            // Mostrar la deseada
+            document.getElementById('screen-' + screenId).classList.add('active');
+        }
 
-                            {/* 2. Numerología */}
-                            <div style={{ ...styles.card, backgroundColor: theme.primary, color: "white" }}>
-                                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                                    <div>
-                                        <h3 style={{ fontSize: 14, opacity: 0.8, margin: 0 }}>CAMINO DE VIDA</h3>
-                                        <div style={{ fontSize: 64, fontFamily: "serif", lineHeight: 1 }}>{lifePath}</div>
-                                    </div>
-                                    <div style={{ textAlign: "right", maxWidth: "50%" }}>
-                                        <p style={{ fontSize: 13, lineHeight: 1.4 }}>
-                                            {lifePath === 1 && "Líder nato. Vienes a iniciar cosas nuevas."}
-                                            {lifePath === 2 && "El diplomático. Tu poder está en la unión."}
-                                            {lifePath === 3 && "Comunicador. Tu voz es tu herramienta."}
-                                            {lifePath === 4 && "Constructor. Creas bases sólidas."}
-                                            {lifePath === 5 && "Libertad. Amas el cambio y la aventura."}
-                                            {lifePath === 6 && "Protector. Cuidas de la familia y comunidad."}
-                                            {lifePath === 7 && "Místico. Buscas la verdad oculta."}
-                                            {lifePath === 8 && "Poder. Vienes a manejar la abundancia."}
-                                            {lifePath === 9 && "Humanitario. Amor universal y compasión."}
-                                            {lifePath > 9 && "Maestro Espiritual. Alta vibración."}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+        // --- VALIDACIÓN Y ESCÁNER ---
+        function validateAndScan() {
+            const name = document.getElementById('user-name').value;
+            const date = document.getElementById('user-date').value;
 
-                            {/* 3. Lectura de Mano IA */}
-                            <div style={styles.card}>
-                                <h3 style={{ fontSize: 16, textTransform: "uppercase", letterSpacing: 1, color: "#999", margin: "0 0 15px 0" }}>Lectura de Palma</h3>
-                                <p style={{ fontSize: 14, lineHeight: 1.6, color: "#555" }}>
-                                    <strong style={{ color: theme.accent }}>Línea del Corazón:</strong> Se detecta profunda y curva. Indicas una naturaleza pasional y muy empática.
-                                    <br/><br/>
-                                    <strong style={{ color: theme.accent }}>Línea de la Cabeza:</strong> Recta y clara. Tienes un pensamiento lógico y pragmático este mes.
-                                </p>
-                            </div>
+            if (!name || !date) {
+                alert("Por favor, ingresa tu nombre y fecha de nacimiento para continuar.");
+                return;
+            }
 
-                            {/* 4. Biorritmos */}
-                            <div style={styles.card}>
-                                <h3 style={{ fontSize: 16, textTransform: "uppercase", letterSpacing: 1, color: "#999", margin: "0 0 15px 0" }}>Niveles de Energía</h3>
-                                
-                                <div style={{ marginBottom: 15 }}>
-                                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 5 }}>
-                                        <span>Físico</span>
-                                        <span>{physical}%</span>
-                                    </div>
-                                    <div style={{ width: "100%", height: 8, background: "#eee", borderRadius: 4 }}>
-                                        <motion.div 
-                                            initial={{ width: 0 }} animate={{ width: `${physical}%` }} 
-                                            style={{ height: "100%", background: theme.primary, borderRadius: 4 }} 
-                                        />
-                                    </div>
-                                </div>
+            goToScreen('scanner');
+            startCamera();
+        }
 
-                                <div>
-                                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 5 }}>
-                                        <span>Emocional</span>
-                                        <span>{emotional}%</span>
-                                    </div>
-                                    <div style={{ width: "100%", height: 8, background: "#eee", borderRadius: 4 }}>
-                                        <motion.div 
-                                            initial={{ width: 0 }} animate={{ width: `${emotional}%` }} 
-                                            style={{ height: "100%", background: theme.accent, borderRadius: 4 }} 
-                                        />
-                                    </div>
-                                </div>
-                            </div>
+        // --- CÁMARA / SIMULACIÓN ---
+        function startCamera() {
+            const video = document.getElementById('camera-video');
+            
+            // Intentar acceder a la cámara trasera del móvil
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                    .then(function(stream) {
+                        video.srcObject = stream;
+                    })
+                    .catch(function(err) {
+                        console.log("Cámara no disponible, usando simulación.", err);
+                        // Si falla (ej. en PC sin webcam), ponemos un fondo astral
+                        video.style.display = 'none';
+                    });
+            }
 
-                            <button 
-                                onClick={handleReset}
-                                style={{ background: "transparent", border: "1px solid #ddd", padding: 15, width: "100%", borderRadius: 50, color: "#999" }}
-                            >
-                                Cerrar Sesión
-                            </button>
+            // Simular tiempo de escaneo (4 segundos)
+            setTimeout(() => {
+                calculateResults();
+                goToScreen('dashboard');
+                // Detener cámara para ahorrar batería
+                if(video.srcObject) {
+                    video.srcObject.getTracks().forEach(track => track.stop());
+                }
+            }, 4000);
+        }
 
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
-    )
-}
+        // --- LÓGICA MATEMÁTICA (CEREBRO) ---
+        function calculateResults() {
+            const name = document.getElementById('user-name').value;
+            const dateStr = document.getElementById('user-date').value;
+            const date = new Date(dateStr);
 
-// Controles opcionales para Framer UI (si quieres cambiar colores desde el menú)
-addPropertyControls(LuminaApp, {
-    tint: { type: ControlType.Color, title: "Tint", defaultValue: theme.primary }
-})
+            // 1. Mostrar Nombre
+            document.getElementById('result-name').innerText = "Hola, " + name.split(" ")[0];
+
+            // 2. Calcular Signo Zodiacal
+            const day = date.getDate();
+            const month = date.getMonth() + 1; // Enero es 0
+            let sign = "", elem = "";
+
+            if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) { sign = "Aries"; elem = "Fuego"; }
+            else if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) { sign = "Tauro"; elem = "Tierra"; }
+            else if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) { sign = "Géminis"; elem = "Aire"; }
+            else if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) { sign = "Cáncer"; elem = "Agua"; }
+            else if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) { sign = "Leo"; elem = "Fuego"; }
+            else if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) { sign = "Virgo"; elem = "Tierra"; }
+            else if ((month == 9 && day >= 23) || (month == 10 && day <= 22)) { sign = "Libra"; elem = "Aire"; }
+            else if ((month == 10 && day >= 23) || (month == 11 && day <= 21)) { sign = "Escorpio"; elem = "Agua"; }
+            else if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) { sign = "Sagitario"; elem = "Fuego"; }
+            else if ((month == 12 && day >= 22) || (month == 1 && day <= 19)) { sign = "Capricornio"; elem = "Tierra"; }
+            else if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) { sign = "Acuario"; elem = "Aire"; }
+            else { sign = "Piscis"; elem = "Agua"; }
+
+            document.getElementById('zodiac-sign').innerText = sign;
+            document.getElementById('zodiac-element').innerText = "Elemento: " + elem;
+
+            // 3. Calcular Numerología (Camino de Vida)
+            let sum = 0;
+            // Sumar todos los dígitos de la fecha string (ej 1990-01-01)
+            const digits = dateStr.replace(/\D/g, ''); 
+            for(let char of digits) sum += parseInt(char);
+            
+            // Reducir a un dígito (1-9)
+            while(sum > 9) {
+                let temp = 0;
+                sum.toString().split('').forEach(d => temp += parseInt(d));
+                sum = temp;
+            }
+            
+            document.getElementById('life-path').innerText = sum;
+            
+            // Significados rápidos
+            const meanings = [
+                "", 
+                "Líder e iniciador. Independencia.",
+                "Diplomático y sensible. Unión.",
+                "Expresivo y creativo. Comunicación.",
+                "Constructor y ordenado. Estabilidad.",
+                "Aventurero y libre. Cambio.",
+                "Protector y familiar. Amor.",
+                "Místico y analítico. Sabiduría.",
+                "Ejecutivo y poderoso. Abundancia.",
+                "Humanitario y compasivo. Finales."
+            ];
+            document.getElementById('life-meaning').innerText = meanings[sum] || "Energía Maestra";
+
+            // 4. Calcular Biorritmos
+            const today = new Date();
+            const diffTime = Math.abs(today - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+
+            // Físico (Ciclo 23 días)
+            const phys = Math.sin((2 * Math.PI * diffDays) / 23);
+            const physPct = Math.floor(((phys + 1) / 2) * 100);
+            
+            // Emocional (Ciclo 28 días)
+            const emo = Math.sin((2 * Math.PI * diffDays) / 28);
+            const emoPct = Math.floor(((emo + 1) / 2) * 100);
+
+            // Actualizar barras UI
+            document.getElementById('bio-phys-val').innerText = physPct + "%";
+            document.getElementById('bio-phys-bar').style.width = physPct + "%";
+            
+            document.getElementById('bio-emo-val').innerText = emoPct + "%";
+            document.getElementById('bio-emo-bar').style.width = emoPct + "%";
+        }
+
+        function resetApp() {
+            document.getElementById('user-name').value = "";
+            document.getElementById('user-date').value = "";
+            goToScreen('welcome');
+        }
+    </script>
+</body>
+</html>
