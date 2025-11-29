@@ -1,0 +1,396 @@
+import * as React from "react"
+import { addPropertyControls, ControlType } from "framer"
+import { motion, AnimatePresence } from "framer-motion"
+
+/**
+ * LUMINA APP - CÓDIGO MAESTRO PARA FRAMER
+ * Incluye: Numerología, Astrología, Lectura de Mano (Cámara) y Biorritmos.
+ */
+
+// --- 1. CONFIGURACIÓN DE DISEÑO (ESTÉTICA YOGA) ---
+const theme = {
+    bg: "#F9F7F2",       // Cream (Fondo Paz)
+    primary: "#8A9A5B",  // Sage Green (Naturaleza)
+    accent: "#E2725B",   // Terracotta (Energía)
+    text: "#36454F",     // Charcoal (Lectura clara)
+    glass: "rgba(255, 255, 255, 0.7)",
+    success: "#A8C3A0",
+}
+
+const styles = {
+    container: {
+        width: "100%",
+        height: "100%",
+        backgroundColor: theme.bg,
+        color: theme.text,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        position: "relative",
+        fontFamily: "Inter, sans-serif",
+    },
+    input: {
+        width: "100%",
+        padding: "16px",
+        borderRadius: 12,
+        border: "1px solid rgba(0,0,0,0.1)",
+        marginBottom: 16,
+        backgroundColor: "white",
+        fontSize: 16,
+        outline: "none",
+    },
+    button: {
+        width: "100%",
+        padding: "18px",
+        borderRadius: 50,
+        border: "none",
+        backgroundColor: theme.primary,
+        color: "white",
+        fontSize: 16,
+        fontWeight: 600,
+        cursor: "pointer",
+        marginTop: 10,
+        boxShadow: "0 4px 12px rgba(138, 154, 91, 0.4)",
+    },
+    card: {
+        backgroundColor: "white",
+        borderRadius: 24,
+        padding: 24,
+        marginBottom: 16,
+        boxShadow: "0 2px 10px rgba(0,0,0,0.03)",
+    },
+    title: {
+        fontFamily: "serif", // Framer usará la fuente serif del sistema si no hay otra
+        fontSize: 32,
+        color: theme.primary,
+        margin: "0 0 10px 0",
+    },
+}
+
+// --- 2. LÓGICA MÍSTICA (MATEMÁTICAS) ---
+
+// Calcular Signo Zodiacal
+const getZodiac = (dateStr) => {
+    if (!dateStr) return { sign: "Sol", element: "Fuego" };
+    const date = new Date(dateStr);
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+
+    if ((month == 1 && day <= 20) || (month == 12 && day >= 22)) return { sign: "Capricornio", element: "Tierra" };
+    if ((month == 1 && day >= 21) || (month == 2 && day <= 18)) return { sign: "Acuario", element: "Aire" };
+    if ((month == 2 && day >= 19) || (month == 3 && day <= 20)) return { sign: "Piscis", element: "Agua" };
+    if ((month == 3 && day >= 21) || (month == 4 && day <= 20)) return { sign: "Aries", element: "Fuego" };
+    if ((month == 4 && day >= 21) || (month == 5 && day <= 20)) return { sign: "Tauro", element: "Tierra" };
+    if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) return { sign: "Géminis", element: "Aire" };
+    if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) return { sign: "Cáncer", element: "Agua" };
+    if ((month == 7 && day >= 23) || (month == 8 && day <= 23)) return { sign: "Leo", element: "Fuego" };
+    if ((month == 8 && day >= 24) || (month == 9 && day <= 23)) return { sign: "Virgo", element: "Tierra" };
+    if ((month == 9 && day >= 24) || (month == 10 && day <= 23)) return { sign: "Libra", element: "Aire" };
+    if ((month == 10 && day >= 24) || (month == 11 && day <= 22)) return { sign: "Escorpio", element: "Agua" };
+    if ((month == 11 && day >= 23) || (month == 12 && day <= 21)) return { sign: "Sagitario", element: "Fuego" };
+    return { sign: "Desconocido", element: "Eter" };
+}
+
+// Calcular Numerología (Camino de Vida)
+const getLifePath = (dateStr) => {
+    if (!dateStr) return 0;
+    const digits = dateStr.replace(/\D/g, '').split('').map(Number);
+    let sum = digits.reduce((a, b) => a + b, 0);
+    while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
+        sum = sum.toString().split('').map(Number).reduce((a, b) => a + b, 0);
+    }
+    return sum;
+}
+
+// Calcular Biorritmo (0 a 100)
+const getBiorhythm = (dateStr, cycle) => {
+    if (!dateStr) return 50;
+    const birth = new Date(dateStr);
+    const now = new Date();
+    const diff = Math.floor((now - birth) / (1000 * 60 * 60 * 24));
+    const val = Math.sin((2 * Math.PI * diff) / cycle);
+    return Math.floor(((val + 1) / 2) * 100);
+}
+
+// --- 3. COMPONENTES INTERNOS ---
+
+// A. Pantalla de Escáner (Con Cámara Real o Simulación)
+const ScannerView = ({ onComplete }) => {
+    const videoRef = React.useRef(null);
+    const [hasCamera, setHasCamera] = React.useState(false);
+
+    React.useEffect(() => {
+        // Intentar acceder a la cámara
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+            .then(stream => {
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                    setHasCamera(true);
+                }
+            })
+            .catch(err => {
+                console.log("No camera access", err);
+                setHasCamera(false);
+            });
+
+        // Temporizador para simular análisis
+        const timer = setTimeout(onComplete, 4000);
+        return () => clearTimeout(timer);
+    }, []);
+
+    return (
+        <div style={{ ...styles.container, background: "black", justifyContent: "center", alignItems: "center" }}>
+            {/* Capa de Video o Fondo */}
+            {hasCamera ? (
+                <video 
+                    ref={videoRef} 
+                    autoPlay 
+                    playsInline 
+                    style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.6 }} 
+                />
+            ) : (
+                <div style={{ position: "absolute", width: "100%", height: "100%", background: `linear-gradient(45deg, ${theme.primary}, #000)` }} />
+            )}
+
+            {/* Gráficos de Escaneo (Overlay) */}
+            <div style={{ position: "absolute", zIndex: 10, width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    style={{ 
+                        width: 280, 
+                        height: 400, 
+                        border: "2px dashed rgba(255,255,255,0.5)", 
+                        borderRadius: 40,
+                        position: "relative",
+                        overflow: "hidden"
+                    }}
+                >
+                    {/* Línea láser de escaneo */}
+                    <motion.div 
+                        style={{ width: "100%", height: 4, background: theme.accent, boxShadow: "0 0 20px " + theme.accent }}
+                        animate={{ top: ["0%", "100%", "0%"] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                        initial={{ position: "absolute", top: 0 }}
+                    />
+                </motion.div>
+                <p style={{ color: "white", marginTop: 20, letterSpacing: 2, fontSize: 12 }}>CONECTANDO CON TU ENERGÍA...</p>
+            </div>
+        </div>
+    );
+}
+
+// --- 4. COMPONENTE PRINCIPAL EXPORTADO ---
+
+export default function LuminaApp(props) {
+    const [screen, setScreen] = React.useState("welcome"); // welcome, input, scanner, dashboard
+    const [data, setData] = React.useState({ name: "", date: "" });
+
+    // Manejadores de flujo
+    const handleStart = () => setScreen("input");
+    
+    const handleScan = () => {
+        if (!data.name || !data.date) {
+            alert("Por favor completa tus datos astrales.");
+            return;
+        }
+        setScreen("scanner");
+    };
+
+    const handleResults = () => setScreen("dashboard");
+    
+    const handleReset = () => {
+        setData({ name: "", date: "" });
+        setScreen("welcome");
+    };
+
+    // Cálculos dinámicos
+    const zodiac = getZodiac(data.date);
+    const lifePath = getLifePath(data.date);
+    const physical = getBiorhythm(data.date, 23);
+    const emotional = getBiorhythm(data.date, 28);
+
+    return (
+        <div style={styles.container}>
+            <AnimatePresence mode="wait">
+                
+                {/* PANTALLA 1: BIENVENIDA */}
+                {screen === "welcome" && (
+                    <motion.div 
+                        key="welcome"
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        style={{ ...styles.container, padding: 30, justifyContent: "center", textAlign: "center" }}
+                    >
+                        <motion.div 
+                            animate={{ y: [0, -10, 0] }} 
+                            transition={{ duration: 3, repeat: Infinity }}
+                            style={{ width: 80, height: 80, borderRadius: 40, background: theme.primary, margin: "0 auto 30px" }} 
+                        />
+                        <h1 style={styles.title}>Lumina</h1>
+                        <p style={{ lineHeight: 1.6, color: "#666" }}>
+                            Descubre lo que los astros, tus manos y los números dicen de ti.
+                        </p>
+                        <div style={{ height: 40 }} />
+                        <button style={styles.button} onClick={handleStart}>INICIAR VIAJE</button>
+                    </motion.div>
+                )}
+
+                {/* PANTALLA 2: DATOS */}
+                {screen === "input" && (
+                    <motion.div 
+                        key="input"
+                        initial={{ x: 300, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -300, opacity: 0 }}
+                        style={{ ...styles.container, padding: 30, justifyContent: "center" }}
+                    >
+                        <h2 style={{ ...styles.title, fontSize: 24 }}>Tus Coordenadas</h2>
+                        <p style={{ marginBottom: 30, fontSize: 14, opacity: 0.7 }}>Para alinear el mapa estelar.</p>
+                        
+                        <label style={{ fontSize: 12, fontWeight: "bold", color: theme.primary, marginBottom: 5, display: "block" }}>NOMBRE COMPLETO</label>
+                        <input 
+                            style={styles.input} 
+                            placeholder="Tu nombre aquí" 
+                            value={data.name}
+                            onChange={(e) => setData({ ...data, name: e.target.value })}
+                        />
+
+                        <label style={{ fontSize: 12, fontWeight: "bold", color: theme.primary, marginBottom: 5, display: "block" }}>FECHA DE NACIMIENTO</label>
+                        <input 
+                            type="date" 
+                            style={styles.input} 
+                            value={data.date}
+                            onChange={(e) => setData({ ...data, date: e.target.value })}
+                        />
+
+                        <button style={styles.button} onClick={handleScan}>ESCANEAR AURA & MANO</button>
+                    </motion.div>
+                )}
+
+                {/* PANTALLA 3: ESCÁNER */}
+                {screen === "scanner" && (
+                    <motion.div 
+                        key="scanner" 
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        style={{ width: "100%", height: "100%" }}
+                    >
+                        <ScannerView onComplete={handleResults} />
+                    </motion.div>
+                )}
+
+                {/* PANTALLA 4: DASHBOARD DE RESULTADOS */}
+                {screen === "dashboard" && (
+                    <motion.div 
+                        key="dashboard"
+                        initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+                        style={{ ...styles.container, overflowY: "scroll" }}
+                    >
+                        {/* Header */}
+                        <div style={{ padding: "40px 24px 20px", background: "white" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <div>
+                                    <h2 style={{ fontSize: 22, margin: 0, fontFamily: "serif", color: theme.text }}>Hola, {data.name.split(" ")[0]}</h2>
+                                    <p style={{ fontSize: 14, color: theme.primary, margin: 0 }}>Lectura completada</p>
+                                </div>
+                                <div style={{ width: 40, height: 40, borderRadius: 20, background: theme.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>
+                                    ✨
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style={{ padding: 24, paddingBottom: 100 }}>
+                            
+                            {/* 1. Carta Astral Resumida */}
+                            <div style={styles.card}>
+                                <h3 style={{ fontSize: 16, textTransform: "uppercase", letterSpacing: 1, color: "#999", margin: "0 0 15px 0" }}>Astro Identidad</h3>
+                                <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
+                                    <div style={{ fontSize: 40 }}>🌞</div>
+                                    <div>
+                                        <div style={{ fontSize: 24, fontWeight: "bold", color: theme.text }}>{zodiac.sign}</div>
+                                        <div style={{ fontSize: 14, color: theme.accent }}>Elemento: {zodiac.element}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 2. Numerología */}
+                            <div style={{ ...styles.card, backgroundColor: theme.primary, color: "white" }}>
+                                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                    <div>
+                                        <h3 style={{ fontSize: 14, opacity: 0.8, margin: 0 }}>CAMINO DE VIDA</h3>
+                                        <div style={{ fontSize: 64, fontFamily: "serif", lineHeight: 1 }}>{lifePath}</div>
+                                    </div>
+                                    <div style={{ textAlign: "right", maxWidth: "50%" }}>
+                                        <p style={{ fontSize: 13, lineHeight: 1.4 }}>
+                                            {lifePath === 1 && "Líder nato. Vienes a iniciar cosas nuevas."}
+                                            {lifePath === 2 && "El diplomático. Tu poder está en la unión."}
+                                            {lifePath === 3 && "Comunicador. Tu voz es tu herramienta."}
+                                            {lifePath === 4 && "Constructor. Creas bases sólidas."}
+                                            {lifePath === 5 && "Libertad. Amas el cambio y la aventura."}
+                                            {lifePath === 6 && "Protector. Cuidas de la familia y comunidad."}
+                                            {lifePath === 7 && "Místico. Buscas la verdad oculta."}
+                                            {lifePath === 8 && "Poder. Vienes a manejar la abundancia."}
+                                            {lifePath === 9 && "Humanitario. Amor universal y compasión."}
+                                            {lifePath > 9 && "Maestro Espiritual. Alta vibración."}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 3. Lectura de Mano IA */}
+                            <div style={styles.card}>
+                                <h3 style={{ fontSize: 16, textTransform: "uppercase", letterSpacing: 1, color: "#999", margin: "0 0 15px 0" }}>Lectura de Palma</h3>
+                                <p style={{ fontSize: 14, lineHeight: 1.6, color: "#555" }}>
+                                    <strong style={{ color: theme.accent }}>Línea del Corazón:</strong> Se detecta profunda y curva. Indicas una naturaleza pasional y muy empática.
+                                    <br/><br/>
+                                    <strong style={{ color: theme.accent }}>Línea de la Cabeza:</strong> Recta y clara. Tienes un pensamiento lógico y pragmático este mes.
+                                </p>
+                            </div>
+
+                            {/* 4. Biorritmos */}
+                            <div style={styles.card}>
+                                <h3 style={{ fontSize: 16, textTransform: "uppercase", letterSpacing: 1, color: "#999", margin: "0 0 15px 0" }}>Niveles de Energía</h3>
+                                
+                                <div style={{ marginBottom: 15 }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 5 }}>
+                                        <span>Físico</span>
+                                        <span>{physical}%</span>
+                                    </div>
+                                    <div style={{ width: "100%", height: 8, background: "#eee", borderRadius: 4 }}>
+                                        <motion.div 
+                                            initial={{ width: 0 }} animate={{ width: `${physical}%` }} 
+                                            style={{ height: "100%", background: theme.primary, borderRadius: 4 }} 
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 5 }}>
+                                        <span>Emocional</span>
+                                        <span>{emotional}%</span>
+                                    </div>
+                                    <div style={{ width: "100%", height: 8, background: "#eee", borderRadius: 4 }}>
+                                        <motion.div 
+                                            initial={{ width: 0 }} animate={{ width: `${emotional}%` }} 
+                                            style={{ height: "100%", background: theme.accent, borderRadius: 4 }} 
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button 
+                                onClick={handleReset}
+                                style={{ background: "transparent", border: "1px solid #ddd", padding: 15, width: "100%", borderRadius: 50, color: "#999" }}
+                            >
+                                Cerrar Sesión
+                            </button>
+
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    )
+}
+
+// Controles opcionales para Framer UI (si quieres cambiar colores desde el menú)
+addPropertyControls(LuminaApp, {
+    tint: { type: ControlType.Color, title: "Tint", defaultValue: theme.primary }
+})
