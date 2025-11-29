@@ -3,495 +3,310 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lumina | Tu Espejo Digital</title>
+    <title>Lumina | Espejo Digital</title>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
     <style>
-        /* --- 1. ESTILOS VISUALES (CSS) --- */
+        /* --- 1. VARIABLES DE COLOR (PALETA YOGA TECH) --- */
         :root {
-            --bg-color: #F9F7F2;       /* Crema Paz */
-            --primary: #8A9A5B;        /* Verde Salvia */
-            --primary-dark: #6e7c49;
-            --accent: #E2725B;         /* Terracota */
-            --text: #36454F;           /* Carbón Suave */
-            --card-bg: #FFFFFF;
-            --scan-line: #E6E6FA;      /* Lavanda */
+            --bg-crema: #F9F7F2;
+            --verde-salvia: #8A9A5B;
+            --verde-oscuro: #6A7A4B;
+            --terracota: #E2725B;
+            --lavanda: #E6E6FA;
+            --texto-carbon: #36454F;
+            --blanco: #FFFFFF;
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #e0e0e0; /* Fondo gris para PC */
+        /* --- 2. RESET Y ESTRUCTURA BASE --- */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
             font-family: 'Inter', sans-serif;
-            color: var(--text);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); /* Textura sutil fondo PC */
+            background-color: var(--bg-crema);
+            color: var(--texto-carbon);
+            overflow: hidden; /* Importante para que se sienta como app */
         }
 
-        /* CONTENEDOR PRINCIPAL (Simula el Móvil en PC) */
-        #app-frame {
-            width: 100%;
-            max-width: 414px; /* Ancho máximo tipo iPhone Max */
-            height: 100vh;
-            max-height: 896px; /* Altura máxima para PC */
-            background-color: var(--bg-color);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        #app-container {
+            width: 100%; height: 100%; position: relative;
         }
 
-        /* --- RESPONSIVIDAD: En móviles reales ocupa todo --- */
-        @media (max-width: 480px) {
-            body { background-color: var(--bg-color); }
-            #app-frame {
-                max-width: 100%;
-                max-height: 100%;
-                border-radius: 0;
-                box-shadow: none;
-            }
-        }
+        /* TIPOGRAFÍA */
+        h1, h2, h3 { font-family: 'Cinzel', serif; color: var(--verde-salvia); margin-top: 0; }
+        h1 { font-size: clamp(36px, 5vw, 52px); font-weight: 700; margin-bottom: 10px; }
+        p { line-height: 1.6; opacity: 0.85; }
 
-        /* PANTALLAS */
+        /* --- 3. PANTALLAS (SCREENS) --- */
         .screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
             padding: 30px;
-            display: flex;
-            flex-direction: column;
-            background: var(--bg-color);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s ease, transform 0.5s ease;
-            transform: translateY(20px);
-            overflow-y: auto; /* Scroll si el contenido es largo */
+            display: flex; flex-direction: column;
+            background: var(--bg-crema);
+            /* LA CLAVE PARA QUE FUNCIONEN LOS BOTONES: */
+            opacity: 0; pointer-events: none; z-index: 0; 
+            transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transform: scale(0.95);
+            overflow-y: auto;
         }
 
         .screen.active {
-            opacity: 1;
-            pointer-events: all;
-            transform: translateY(0);
-            z-index: 10;
+            opacity: 1; pointer-events: auto; z-index: 10;
+            transform: scale(1);
         }
 
-        /* TIPOGRAFÍA Y COMPONENTES */
-        h1, h2, h3 {
-            font-family: 'Cinzel', serif;
-            color: var(--primary);
-            margin-top: 0;
-        }
-
-        p {
-            line-height: 1.6;
-            opacity: 0.8;
-            font-size: 15px;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-            color: var(--primary);
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        input {
+        /* --- 4. BOTONES MODERNOS CON "LUZ EN MOVIMIENTO" --- */
+        .btn-luz {
+            position: relative;
             width: 100%;
-            padding: 16px;
-            border: 1px solid rgba(0,0,0,0.1);
-            border-radius: 12px;
-            font-size: 16px;
-            font-family: 'Inter', sans-serif;
-            background: var(--card-bg);
-            outline: none;
-            transition: border 0.3s;
-        }
-
-        input:focus {
-            border-color: var(--primary);
-        }
-
-        button.btn-primary {
-            width: 100%;
-            padding: 18px;
-            background-color: var(--primary);
-            color: white;
+            padding: 20px 30px;
             border: none;
             border-radius: 50px;
-            font-size: 16px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
+            /* Degradado sutil de base */
+            background: linear-gradient(135deg, var(--verde-salvia), var(--verde-oscuro));
+            color: var(--blanco);
+            font-family: 'Inter', sans-serif;
+            font-size: 16px; font-weight: 600; letter-spacing: 1px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(138, 154, 91, 0.4);
-            transition: transform 0.2s, background 0.3s;
-            margin-top: 10px;
+            overflow: hidden; /* Necesario para el efecto de luz */
+            transition: all 0.4s ease;
+            box-shadow: 0 8px 20px rgba(138, 154, 91, 0.3);
+            margin-top: 20px;
         }
 
-        button.btn-primary:active {
-            transform: scale(0.97);
+        /* El haz de luz (pseudo-elemento) */
+        .btn-luz::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; /* Empieza fuera a la izquierda */
+            width: 100%; height: 100%;
+            /* El efecto de brillo diagonal */
+            background: linear-gradient(120deg, transparent, rgba(255,255,255, 0.5), transparent);
+            transition: all 0.7s ease;
         }
 
-        /* CARDS DE RESULTADOS */
-        .card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-            animation: slideIn 0.6s ease;
+        /* Animación al pasar el mouse */
+        .btn-luz:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(138, 154, 91, 0.5);
         }
-
-        .numerology-number {
-            font-size: 60px;
-            font-family: 'Cinzel', serif;
-            color: var(--accent);
-            line-height: 1;
-            margin-bottom: 10px;
-        }
-
-        /* BARRA DE BIORRITMOS */
-        .progress-bar-bg {
-            width: 100%;
-            height: 8px;
-            background: #eee;
-            border-radius: 4px;
-            margin-top: 8px;
-            overflow: hidden;
-        }
-        .progress-bar-fill {
-            height: 100%;
-            background: var(--primary);
-            width: 0%;
-            transition: width 1s ease-out;
-        }
-
-        /* ESCÁNER DE MANO */
-        .scanner-container {
-            width: 100%;
-            height: 400px;
-            background: #000;
-            border-radius: 30px;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .btn-luz:hover::before {
+            left: 100%; /* Mueve la luz hacia la derecha */
         }
         
-        #camera-video {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0.7;
+        .btn-secundario {
+             background: transparent; border: 1px solid var(--verde-salvia); color: var(--verde-salvia); box-shadow: none;
         }
+        .btn-secundario:hover { background: rgba(138, 154, 91, 0.1); }
+        .btn-secundario::before { display: none; } /* Sin luz el secundario */
 
-        .scan-overlay {
-            width: 80%;
-            height: 70%;
-            border: 2px dashed rgba(255,255,255,0.4);
-            border-radius: 40px;
-            position: relative;
-            z-index: 5;
-            box-shadow: 0 0 0 1000px rgba(0,0,0,0.5); /* Efecto viñeta */
+        /* --- 5. COMPONENTES ESPECÍFICOS --- */
+        
+        /* INPUTS */
+        .input-group { margin-bottom: 20px; }
+        label { font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; color: var(--verde-salvia); display: block; margin-bottom: 8px; }
+        input {
+            width: 100%; padding: 18px; border: 1px solid rgba(138, 154, 91, 0.2);
+            border-radius: 16px; font-size: 16px; background: var(--blanco); outline: none; transition: border 0.3s;
+            font-family: 'Inter', sans-serif;
         }
+        input:focus { border-color: var(--verde-salvia); }
 
-        .laser {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: var(--scan-line);
-            box-shadow: 0 0 15px var(--scan-line);
-            animation: scanAnim 3s infinite ease-in-out;
-        }
+        /* LISTA DE CARACTERÍSTICAS (HOME) */
+        .feature-list { list-style: none; padding: 0; margin: 30px 0; text-align: left; display: inline-block; }
+        .feature-list li { margin-bottom: 15px; display: flex; align-items: center; font-weight: 500; }
+        .feature-icon { margin-right: 15px; font-size: 24px; color: var(--terracota); }
 
-        @keyframes scanAnim {
-            0% { top: 0%; opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
+        /* GRID DEL DASHBOARD (Menú de opciones) */
+        .menu-grid {
+            display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 1000px; margin: 0 auto;
         }
+        /* En PC se divide en 2 columnas */
+        @media (min-width: 768px) { .menu-grid { grid-template-columns: repeat(2, 1fr); } }
 
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .menu-card {
+            background: var(--blanco); padding: 30px; border-radius: 24px;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.04); cursor: pointer;
+            transition: all 0.3s ease; display: flex; align-items: center;
+            border: 1px solid transparent;
         }
+        .menu-card:hover { transform: translateY(-5px); border-color: var(--verde-salvia); box-shadow: 0 10px 40px rgba(138, 154, 91, 0.2); }
+        .menu-icon { font-size: 40px; margin-right: 20px; }
+        .menu-title { font-size: 20px; font-weight: 700; font-family: 'Cinzel'; margin: 0; color: var(--texto-carbon); }
+        .menu-desc { font-size: 13px; margin: 5px 0 0 0; opacity: 0.7; }
+
+        /* ESCÁNER */
+        #scanner-overlay {
+            position: fixed; top:0; left:0; width:100%; height:100%; background: #111; z-index: 100;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .laser-line { height: 4px; background: var(--lavanda); box-shadow: 0 0 20px var(--lavanda); width: 80%; animation: scan 2s infinite ease-in-out; }
+        @keyframes scan { 0%, 100% { transform: translateY(-150px); opacity: 0;} 50% { transform: translateY(150px); opacity: 1;} }
 
     </style>
 </head>
 <body>
 
-    <div id="app-frame">
+    <div id="app-container">
         
-        <div id="screen-welcome" class="screen active" style="justify-content: center; text-align: center;">
-            <div style="width: 80px; height: 80px; background: var(--primary); border-radius: 50%; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center;">
-                <span style="font-size: 40px;">✋</span>
-            </div>
-            <h1 style="font-size: 36px;">Lumina</h1>
-            <p style="margin-bottom: 40px;">Descubre tu mapa estelar, numerología y la energía de tus manos.</p>
-            <button class="btn-primary" onclick="goToScreen('input')">COMENZAR VIAJE</button>
-        </div>
-
-        <div id="screen-input" class="screen" style="justify-content: center;">
-            <h2>Tus Coordenadas</h2>
-            <p>Para alinear las estrellas, necesitamos saber quién eres.</p>
+        <div id="screen-home" class="screen active" style="align-items: center; text-align: center; justify-content: center;">
+            <div style="margin-bottom: 20px; font-size: 60px;">✨</div>
+            <h1>Lumina</h1>
+            <p style="max-width: 500px; font-size: 18px;">Tu billetera espiritual. Unificamos la sabiduría ancestral con tecnología moderna para tu autoconocimiento.</p>
             
-            <div class="input-group">
-                <label>Nombre Completo</label>
-                <input type="text" id="user-name" placeholder="Ej. Ana Luz">
+            <div style="background: rgba(138, 154, 91, 0.05); padding: 30px; border-radius: 24px; margin: 20px 0;">
+                <p style="font-weight: 700; margin-bottom: 20px; color: var(--verde-salvia);">LO QUE DESCUBRIRÁS:</p>
+                <ul class="feature-list">
+                    <li><span class="feature-icon">🤲</span> Quiromancia IA (Lectura de Mano)</li>
+                    <li><span class="feature-icon">🪐</span> Carta Astral Simplificada</li>
+                    <li><span class="feature-icon">🔢</span> Numerología Tántrica</li>
+                    <li><span class="feature-icon">⚡</span> Biorritmos de Energía Diaria</li>
+                </ul>
             </div>
 
-            <div class="input-group">
-                <label>Fecha de Nacimiento</label>
-                <input type="date" id="user-date">
-            </div>
-
-            <button class="btn-primary" onclick="validateAndScan()">ESCANEAR ENERGÍA</button>
-            <p style="text-align: center; font-size: 12px; margin-top: 15px; cursor: pointer; color: #999;" onclick="goToScreen('welcome')">Volver</p>
+            <button class="btn-luz" onclick="navegar('input')">COMENZAR MI VIAJE</button>
         </div>
 
-        <div id="screen-scanner" class="screen" style="background: #111; padding: 0;">
-            <div class="scanner-container">
-                <video id="camera-video" autoplay playsinline muted></video>
-                <div class="scan-overlay">
-                    <div class="laser"></div>
+
+        <div id="screen-input" class="screen" style="justify-content: center; align-items: center;">
+            <div style="background: var(--blanco); padding: 40px; border-radius: 30px; width: 100%; max-width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.03);">
+                <h2 style="text-align: center;">Alineación Energética</h2>
+                <p style="text-align: center; margin-bottom: 30px;">Necesitamos tus coordenadas vitales.</p>
+                
+                <div class="input-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" id="user-name" placeholder="Ej. Alma Luz">
                 </div>
-                <div style="position: absolute; bottom: 30px; color: white; text-align: center; width: 100%; z-index: 10;">
-                    <p style="letter-spacing: 2px; font-size: 12px;">ANALIZANDO PALMA DERECHA...</p>
+                <div class="input-group">
+                    <label>Fecha de Nacimiento</label>
+                    <input type="date" id="user-date">
                 </div>
+
+                <button class="btn-luz" onclick="iniciarEscaneo()">ESCANEAR ENERGÍA AHORA</button>
+                <button class="btn-luz btn-secundario" onclick="navegar('home')" style="margin-top: 10px;">Volver</button>
             </div>
         </div>
+
 
         <div id="screen-dashboard" class="screen">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
                 <div>
-                    <h2 id="result-name" style="margin: 0;">Hola, Alma</h2>
-                    <p style="margin: 0; font-size: 12px; color: var(--primary);">Lectura completada</p>
+                    <h2 style="margin: 0; font-size: 28px;">Hola, <span id="display-name">Alma</span></h2>
+                    <p style="margin: 5px 0 0 0;">Tu mapa espiritual está listo. Elige una guía:</p>
                 </div>
-                <div onclick="resetApp()" style="cursor: pointer;">↺</div>
+                <button class="btn-luz btn-secundario" onclick="navegar('home')" style="width: auto; padding: 10px 20px; font-size: 14px; margin: 0;">Salir</button>
             </div>
 
-            <div class="card">
-                <h3 style="font-size: 14px; text-transform: uppercase; color: #999;">Tu Astro Regente</h3>
-                <div style="display: flex; align-items: center; gap: 15px; margin-top: 10px;">
-                    <span style="font-size: 30px;">✨</span>
+            <div class="menu-grid">
+                <div class="menu-card" onclick="mostrarResultado('carta-astral')">
+                    <div class="menu-icon">🪐</div>
                     <div>
-                        <strong id="zodiac-sign" style="font-size: 20px; color: var(--text);">Calculando...</strong>
-                        <div id="zodiac-element" style="font-size: 13px; color: var(--accent);">Elemento</div>
+                        <h3 class="menu-title">Carta Astral</h3>
+                        <p class="menu-desc">Tu signo solar, elemento regente y posición cósmica.</p>
+                    </div>
+                </div>
+                <div class="menu-card" onclick="mostrarResultado('quiromancia')">
+                    <div class="menu-icon">🤲</div>
+                    <div>
+                        <h3 class="menu-title">Quiromancia IA</h3>
+                        <p class="menu-desc">Análisis de tus líneas de corazón y cabeza.</p>
+                    </div>
+                </div>
+                <div class="menu-card" onclick="mostrarResultado('numerologia')">
+                    <div class="menu-icon">🔢</div>
+                    <div>
+                        <h3 class="menu-title">Numerología</h3>
+                        <p class="menu-desc">Descubre tu Número de Camino de Vida y su misión.</p>
+                    </div>
+                </div>
+                <div class="menu-card" onclick="mostrarResultado('biorritmos')">
+                    <div class="menu-icon">⚡</div>
+                    <div>
+                        <h3 class="menu-title">Biorritmos</h3>
+                        <p class="menu-desc">Tus niveles de energía física y emocional hoy.</p>
                     </div>
                 </div>
             </div>
-
-            <div class="card" style="background-color: var(--primary); color: white;">
-                <h3 style="font-size: 14px; text-transform: uppercase; color: rgba(255,255,255,0.7);">Camino de Vida</h3>
-                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                    <div class="numerology-number" id="life-path" style="color: white;">0</div>
-                    <div style="text-align: right; width: 60%;">
-                        <p id="life-meaning" style="font-size: 12px; margin: 0; color: rgba(255,255,255,0.9);">
-                            Significado...
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 style="font-size: 14px; text-transform: uppercase; color: #999;">Quiromancia Digital</h3>
-                <p style="font-size: 14px; margin-top: 10px;">
-                    <strong style="color: var(--accent);">Línea del Corazón:</strong> Se detecta una curvatura profunda. Tienes una gran capacidad para la empatía emocional esta semana.
-                </p>
-                <p style="font-size: 14px;">
-                    <strong style="color: var(--accent);">Monte de Venus:</strong> Elevado. Tu energía vital y pasión están en un ciclo alto.
-                </p>
-            </div>
-
-            <div class="card">
-                <h3 style="font-size: 14px; text-transform: uppercase; color: #999;">Biorritmos Hoy</h3>
-                
-                <div style="margin-top: 15px;">
-                    <div style="display: flex; justify-content: space-between; font-size: 12px;">
-                        <span>Energía Física</span>
-                        <span id="bio-phys-val">0%</span>
-                    </div>
-                    <div class="progress-bar-bg">
-                        <div id="bio-phys-bar" class="progress-bar-fill" style="background-color: var(--primary);"></div>
-                    </div>
-                </div>
-
-                <div style="margin-top: 15px;">
-                    <div style="display: flex; justify-content: space-between; font-size: 12px;">
-                        <span>Energía Emocional</span>
-                        <span id="bio-emo-val">0%</span>
-                    </div>
-                    <div class="progress-bar-bg">
-                        <div id="bio-emo-bar" class="progress-bar-fill" style="background-color: var(--accent);"></div>
-                    </div>
-                </div>
-            </div>
-
-            <button class="btn-primary" style="background: transparent; border: 1px solid #ccc; color: #999; box-shadow: none;" onclick="resetApp()">Cerrar Lectura</button>
-            <div style="height: 50px;"></div> </div>
-
+        </div>
     </div>
 
+    <div id="scanner-overlay">
+        <video id="video-feed" autoplay muted playsinline style="position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0.5;"></video>
+        <div style="z-index: 10; border: 2px dashed rgba(255,255,255,0.5); width: 80%; height: 60%; border-radius: 30px; display: flex; justify-content: center; align-items: center;">
+            <div class="laser-line"></div>
+        </div>
+        <p style="color: white; z-index: 10; margin-top: 30px; letter-spacing: 2px;">Conectando con tu huella...</p>
+    </div>
+
+
     <script>
-        // --- NAVEGACIÓN ---
-        function goToScreen(screenId) {
-            // Ocultar todas
+        // --- LÓGICA JAVASCRIPT ---
+
+        // Navegación simple entre pantallas
+        function navegar(screenId) {
+            // Desactivar todas
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            // Mostrar la deseada
+            // Activar la deseada
             document.getElementById('screen-' + screenId).classList.add('active');
         }
 
-        // --- VALIDACIÓN Y ESCÁNER ---
-        function validateAndScan() {
-            const name = document.getElementById('user-name').value;
-            const date = document.getElementById('user-date').value;
+        // Iniciar el proceso de escaneo
+        function iniciarEscaneo() {
+            const nameInput = document.getElementById('user-name').value;
+            const dateInput = document.getElementById('user-date').value;
 
-            if (!name || !date) {
-                alert("Por favor, ingresa tu nombre y fecha de nacimiento para continuar.");
+            if (!nameInput || !dateInput) {
+                alert("Por favor, introduce tu nombre y fecha para continuar.");
                 return;
             }
 
-            goToScreen('scanner');
-            startCamera();
-        }
+            // Actualizar nombre en el dashboard
+            document.getElementById('display-name').innerText = nameInput.split(" ")[0];
 
-        // --- CÁMARA / SIMULACIÓN ---
-        function startCamera() {
-            const video = document.getElementById('camera-video');
-            
-            // Intentar acceder a la cámara trasera del móvil
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-                    .then(function(stream) {
-                        video.srcObject = stream;
-                    })
-                    .catch(function(err) {
-                        console.log("Cámara no disponible, usando simulación.", err);
-                        // Si falla (ej. en PC sin webcam), ponemos un fondo astral
-                        video.style.display = 'none';
-                    });
+            // Mostrar escáner
+            const scanner = document.getElementById('scanner-overlay');
+            const video = document.getElementById('video-feed');
+            scanner.style.display = 'flex';
+
+            // Intentar cámara (simulación si falla)
+            if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                 navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                 .then(stream => video.srcObject = stream)
+                 .catch(e => console.log("Cámara no disponible"));
             }
 
-            // Simular tiempo de escaneo (4 segundos)
+            // Esperar 3.5 segundos y e ir al menú
             setTimeout(() => {
-                calculateResults();
-                goToScreen('dashboard');
-                // Detener cámara para ahorrar batería
-                if(video.srcObject) {
-                    video.srcObject.getTracks().forEach(track => track.stop());
-                }
-            }, 4000);
+                scanner.style.display = 'none';
+                if(video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+                navegar('dashboard');
+            }, 3500);
         }
 
-        // --- LÓGICA MATEMÁTICA (CEREBRO) ---
-        function calculateResults() {
-            const name = document.getElementById('user-name').value;
-            const dateStr = document.getElementById('user-date').value;
-            const date = new Date(dateStr);
-
-            // 1. Mostrar Nombre
-            document.getElementById('result-name').innerText = "Hola, " + name.split(" ")[0];
-
-            // 2. Calcular Signo Zodiacal
-            const day = date.getDate();
-            const month = date.getMonth() + 1; // Enero es 0
-            let sign = "", elem = "";
-
-            if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) { sign = "Aries"; elem = "Fuego"; }
-            else if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) { sign = "Tauro"; elem = "Tierra"; }
-            else if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) { sign = "Géminis"; elem = "Aire"; }
-            else if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) { sign = "Cáncer"; elem = "Agua"; }
-            else if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) { sign = "Leo"; elem = "Fuego"; }
-            else if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) { sign = "Virgo"; elem = "Tierra"; }
-            else if ((month == 9 && day >= 23) || (month == 10 && day <= 22)) { sign = "Libra"; elem = "Aire"; }
-            else if ((month == 10 && day >= 23) || (month == 11 && day <= 21)) { sign = "Escorpio"; elem = "Agua"; }
-            else if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) { sign = "Sagitario"; elem = "Fuego"; }
-            else if ((month == 12 && day >= 22) || (month == 1 && day <= 19)) { sign = "Capricornio"; elem = "Tierra"; }
-            else if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) { sign = "Acuario"; elem = "Aire"; }
-            else { sign = "Piscis"; elem = "Agua"; }
-
-            document.getElementById('zodiac-sign').innerText = sign;
-            document.getElementById('zodiac-element').innerText = "Elemento: " + elem;
-
-            // 3. Calcular Numerología (Camino de Vida)
-            let sum = 0;
-            // Sumar todos los dígitos de la fecha string (ej 1990-01-01)
-            const digits = dateStr.replace(/\D/g, ''); 
-            for(let char of digits) sum += parseInt(char);
-            
-            // Reducir a un dígito (1-9)
-            while(sum > 9) {
-                let temp = 0;
-                sum.toString().split('').forEach(d => temp += parseInt(d));
-                sum = temp;
+        // Simulación de mostrar resultados individuales
+        function mostrarResultado(tipo) {
+            let mensaje = "";
+            switch(tipo) {
+                case 'carta-astral':
+                    mensaje = "✨ Resultado Astral: Basado en tu fecha, tu energía tiende a ser cardinal. Eres un iniciador.";
+                    break;
+                case 'quiromancia':
+                    mensaje = "🤲 Resultado de Mano: Tu línea del corazón muestra una gran capacidad empática y pasión reciente.";
+                    break;
+                case 'numerologia':
+                    mensaje = "🔢 Resultado Numérico: Tu vibración actual sugiere un ciclo de construcción y estabilidad.";
+                    break;
+                case 'biorritmos':
+                    mensaje = "⚡ Resultado de Energía: Hoy tu energía física está al 85%, pero tu emocional al 40%. Día para hacer, no para sentir.";
+                    break;
             }
-            
-            document.getElementById('life-path').innerText = sum;
-            
-            // Significados rápidos
-            const meanings = [
-                "", 
-                "Líder e iniciador. Independencia.",
-                "Diplomático y sensible. Unión.",
-                "Expresivo y creativo. Comunicación.",
-                "Constructor y ordenado. Estabilidad.",
-                "Aventurero y libre. Cambio.",
-                "Protector y familiar. Amor.",
-                "Místico y analítico. Sabiduría.",
-                "Ejecutivo y poderoso. Abundancia.",
-                "Humanitario y compasivo. Finales."
-            ];
-            document.getElementById('life-meaning').innerText = meanings[sum] || "Energía Maestra";
-
-            // 4. Calcular Biorritmos
-            const today = new Date();
-            const diffTime = Math.abs(today - date);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-
-            // Físico (Ciclo 23 días)
-            const phys = Math.sin((2 * Math.PI * diffDays) / 23);
-            const physPct = Math.floor(((phys + 1) / 2) * 100);
-            
-            // Emocional (Ciclo 28 días)
-            const emo = Math.sin((2 * Math.PI * diffDays) / 28);
-            const emoPct = Math.floor(((emo + 1) / 2) * 100);
-
-            // Actualizar barras UI
-            document.getElementById('bio-phys-val').innerText = physPct + "%";
-            document.getElementById('bio-phys-bar').style.width = physPct + "%";
-            
-            document.getElementById('bio-emo-val').innerText = emoPct + "%";
-            document.getElementById('bio-emo-bar').style.width = emoPct + "%";
-        }
-
-        function resetApp() {
-            document.getElementById('user-name').value = "";
-            document.getElementById('user-date').value = "";
-            goToScreen('welcome');
+            // Por ahora usamos un alert elegante para la demo
+            alert(mensaje + "\n\n(En la versión final, esto abrirá una pantalla detallada).");
         }
     </script>
+
 </body>
 </html>
